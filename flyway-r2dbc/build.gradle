@@ -1,0 +1,15 @@
+ext {
+    flywayVersion = "9.22.0"
+    mysqlVersion = "8.0.33"
+    r2dbcVersion = "1.0.5"
+}
+
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-r2dbc:${springBootVersion}"
+    implementation "org.flywaydb:flyway-mysql:${flywayVersion}"
+
+    runtimeOnly "com.mysql:mysql-connector-j:${mysqlVersion}"
+    runtimeOnly "io.asyncer:r2dbc-mysql:${r2dbcVersion}"
+}

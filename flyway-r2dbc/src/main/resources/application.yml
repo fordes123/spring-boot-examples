@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: flyway-r2dbc
+
+  r2dbc:
+    name: item_nav
+    url: r2dbc:mysql://localhost:3306/test_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=PRC&allowPublicKeyRetrieval=true
+    username: root
+    password: 12345678
+
+  flyway:
+    enabled: true
+    encoding: UTF-8
+    locations: classpath:db
+    table: schema_version
+    baseline-on-migrate: true
+    validate-on-migrate: true
