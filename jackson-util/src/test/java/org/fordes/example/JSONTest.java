@@ -61,13 +61,13 @@ class JSONTest {
 
     @Test
     void testToBean1() {
-        assertThat(JSON.toBean("{1:\"1\", 2:2}", new TypeReference<Map<Integer, String>>() {})).isEqualTo(Map.of(1, "1", 2, "2"));
+        assertThat(JSON.toBean("{\"1\":\"1\", \"2\":2}", new TypeReference<Map<Integer, String>>() {})).isEqualTo(Map.of(1, "1", 2, "2"));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void testToBean2() {
-        assertThat(JSON.toBean("{1:\"1\", 2:2}", Map.class)).isEqualTo(Map.of("1", "1", "2", 2));
+        assertThat(JSON.toBean("{\"1\":\"1\", \"2\":2}", Map.class)).isEqualTo(Map.of("1", "1", "2", 2));
     }
 
     @Test

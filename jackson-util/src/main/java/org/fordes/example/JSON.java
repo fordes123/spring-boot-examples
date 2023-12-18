@@ -1,9 +1,7 @@
 package org.fordes.example;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -31,35 +29,49 @@ import java.util.Set;
 
 @Slf4j
 public abstract class JSON {
-    protected static final ObjectMapper mapper;
-    protected static final SimpleModule dateModule;
 
     public static final String LEFT_BRACE = "{";
     public static final String RIGHT_BRACE = "}";
     public static final String LEFT_BRACKET = "[";
     public static final String RIGHT_BRACKET = "]";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String TIME_FORMAT = "HH:mm:ss";
+
+    protected static final ObjectMapper mapper;
+    protected static final SimpleModule dateModule;
+    protected static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+    protected static final DateTimeFormatter localDateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    protected static final DateTimeFormatter localDateFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+    protected static final DateTimeFormatter localTimeFormatter = DateTimeFormatter.ofPattern(TIME_FORMAT);
+
 
     private JSON() {
     }
 
     static {
-        dateModule = new SimpleModule();
-        dateModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        dateModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        dateModule.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormatter.ofPattern("HH:mm:ss")));
-        dateModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        dateModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-        dateModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern("HH:mm:ss")));
-
         mapper = new ObjectMapper();
+
+        dateModule = new SimpleModule();
+        dateModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(localDateTimeFormatter));
+        dateModule.addSerializer(LocalDate.class, new LocalDateSerializer(localDateFormatter));
+        dateModule.addSerializer(LocalTime.class, new LocalTimeSerializer(localTimeFormatter));
+        dateModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(localDateTimeFormatter));
+        dateModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(localDateFormatter));
+        dateModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(localTimeFormatter));
+        mapper.registerModule(dateModule);
+
+        mapper.setDateFormat(dateFormat);
+        mapper.setTimeZone(dateFormat.getTimeZone());
+        mapper.getDeserializationConfig().with(dateFormat);
+
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
-        mapper.registerModule(dateModule);
+
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
@@ -133,14 +145,13 @@ public abstract class JSON {
             if (obj instanceof Number || obj instanceof Boolean || obj instanceof CharSequence) {
                 return obj.toString();
             } else if (obj instanceof Date d) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                return sdf.format(d);
+                return dateFormat.format(d);
             } else if (obj instanceof LocalDateTime ldt) {
-                return ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                return ldt.format(localDateTimeFormatter);
             } else if (obj instanceof LocalDate ld) {
-                return ld.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                return ld.format(localDateFormatter);
             } else if (obj instanceof LocalTime lt) {
-                return lt.format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                return lt.format(localTimeFormatter);
             } else
                 return obj.toString();
         }
@@ -189,7 +200,7 @@ public abstract class JSON {
      * @param clazz Set中元素类型
      * @return {@link Set <T>}
      */
-    public static <T> @Nullable Set<T> toSet(String json, @Nonnull  Class<T> clazz) {
+    public static <T> @Nullable Set<T> toSet(String json, @Nonnull Class<T> clazz) {
         if (isJson(json)) {
             try {
                 JavaType javaType = mapper.getTypeFactory().constructParametricType(Set.class, clazz);
@@ -211,7 +222,7 @@ public abstract class JSON {
      * @param typeReference {@link TypeReference} 类型参考子类，可以获取其泛型参数中的Type类型
      * @return 实体类对象
      */
-    public static <T> @Nullable T toBean(String json, @Nonnull  TypeReference<T> typeReference) {
+    public static <T> @Nullable T toBean(String json, @Nonnull TypeReference<T> typeReference) {
         if (isJson(json)) {
             try {
                 return mapper.readValue(json, typeReference);
@@ -230,7 +241,7 @@ public abstract class JSON {
      * @param tClass 对象类型
      * @return 实体类对象
      */
-    public static <T> @Nullable T toBean(String json, @Nonnull  Class<T> tClass) {
+    public static <T> @Nullable T toBean(String json, @Nonnull Class<T> tClass) {
         if (isJson(json)) {
             try {
                 return mapper.readValue(json, tClass);
@@ -311,7 +322,7 @@ public abstract class JSON {
      * @param clazz List元素类型
      * @return 值
      */
-    public static <T> @Nullable List<T> getList(String json, String key,@Nonnull Class<T> clazz) {
+    public static <T> @Nullable List<T> getList(String json, String key, @Nonnull Class<T> clazz) {
         if (key != null && isJson(json)) {
             try {
                 JsonNode valueNode = getNode(json, key);
