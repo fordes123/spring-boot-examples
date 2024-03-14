@@ -65,14 +65,20 @@ public abstract class JSON {
         mapper.setTimeZone(dateFormat.getTimeZone());
         mapper.getDeserializationConfig().with(dateFormat);
 
+        //空对象抛出异常
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        //枚举类转换为字符串
         mapper.configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, true);
+        //日期转换为时间戳
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
+        //未知属性抛出异常
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        //接受空字符作为空对象
         mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        //是否包写出值为null的字段
+        mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
     }
 
     /**
@@ -97,7 +103,7 @@ public abstract class JSON {
      * @param json JSON字符串
      * @return 是否为JSON字符串
      */
-    public static boolean isJson(String json) {
+    public static boolean isJson(@Nullable String json) {
         if (StringUtils.hasText(json)) {
             String val = json.trim();
             if (val.startsWith(LEFT_BRACE) && val.endsWith(RIGHT_BRACE) ||
@@ -120,7 +126,7 @@ public abstract class JSON {
      * @param obj 目标对象
      * @return JSON字符串
      */
-    public static @Nullable String toJsonStr(Object obj) {
+    public static @Nullable String toJsonStr(@Nullable Object obj) {
         if (obj != null && canToJson(obj)) {
             try {
                 return mapper.writeValueAsString(obj);
@@ -138,8 +144,10 @@ public abstract class JSON {
      * @param obj 目标对象
      * @return 字符串
      */
-    public static @Nullable String toStr(Object obj) {
-        if (canToJson(obj)) {
+    public static @Nullable String toStr(@Nullable Object obj) {
+        if (obj == null) {
+            return null;
+        } else if (canToJson(obj)) {
             return toJsonStr(obj);
         } else {
             if (obj instanceof Number || obj instanceof Boolean || obj instanceof CharSequence) {
@@ -163,7 +171,7 @@ public abstract class JSON {
      * @param obj 目标对象
      * @return JSON字节数组
      */
-    public static @Nullable byte[] toJsonByte(Object obj) {
+    public static @Nullable byte[] toJsonByte(@Nullable Object obj) {
         if (obj != null && canToJson(obj)) {
             try {
                 return mapper.writeValueAsBytes(obj);
@@ -181,7 +189,7 @@ public abstract class JSON {
      * @param clazz List中元素类型
      * @return {@link List <T>}
      */
-    public static @Nullable <T> List<T> toList(String json, @Nonnull Class<T> clazz) {
+    public static @Nullable <T> List<T> toList(@Nullable String json, @Nonnull Class<T> clazz) {
         if (isJson(json)) {
             try {
                 JavaType javaType = mapper.getTypeFactory().constructParametricType(List.class, clazz);
@@ -200,7 +208,7 @@ public abstract class JSON {
      * @param clazz Set中元素类型
      * @return {@link Set <T>}
      */
-    public static <T> @Nullable Set<T> toSet(String json, @Nonnull Class<T> clazz) {
+    public static <T> @Nullable Set<T> toSet(@Nullable String json, @Nonnull Class<T> clazz) {
         if (isJson(json)) {
             try {
                 JavaType javaType = mapper.getTypeFactory().constructParametricType(Set.class, clazz);
@@ -222,7 +230,7 @@ public abstract class JSON {
      * @param typeReference {@link TypeReference} 类型参考子类，可以获取其泛型参数中的Type类型
      * @return 实体类对象
      */
-    public static <T> @Nullable T toBean(String json, @Nonnull TypeReference<T> typeReference) {
+    public static <T> @Nullable T toBean(@Nullable String json, @Nonnull TypeReference<T> typeReference) {
         if (isJson(json)) {
             try {
                 return mapper.readValue(json, typeReference);
@@ -241,7 +249,7 @@ public abstract class JSON {
      * @param tClass 对象类型
      * @return 实体类对象
      */
-    public static <T> @Nullable T toBean(String json, @Nonnull Class<T> tClass) {
+    public static <T> @Nullable T toBean(@Nullable String json, @Nonnull Class<T> tClass) {
         if (isJson(json)) {
             try {
                 return mapper.readValue(json, tClass);
@@ -259,8 +267,8 @@ public abstract class JSON {
      * @param key  节点key
      * @return {@link JsonNode}
      */
-    public static @Nullable JsonNode getNode(String json, String key) {
-        if (key != null && isJson(json)) {
+    public static @Nullable JsonNode getNode(@Nullable String json, @Nullable String key) {
+        if (StringUtils.hasText(key) && isJson(json)) {
             try {
                 return mapper.readTree(json).get(key);
             } catch (JsonProcessingException e) {
@@ -278,7 +286,7 @@ public abstract class JSON {
      * @param typeReference {@link TypeReference} 类型参考子类，可以获取其泛型参数中的Type类型
      * @return 值
      */
-    public static <T> @Nullable T get(String json, String key, @Nonnull TypeReference<T> typeReference) {
+    public static <T> @Nullable T get(@Nullable String json, @Nullable String key, @Nonnull TypeReference<T> typeReference) {
         if (StringUtils.hasText(key) && isJson(json)) {
             try {
                 JsonNode valueNode = getNode(json, key);
@@ -300,7 +308,7 @@ public abstract class JSON {
      * @param clazz 值的类型
      * @return 值
      */
-    public static <T> @Nullable T get(String json, String key, @Nonnull Class<T> clazz) {
+    public static <T> @Nullable T get(@Nullable String json, @Nullable String key, @Nonnull Class<T> clazz) {
         if (StringUtils.hasText(key) && isJson(json)) {
             try {
                 JsonNode valueNode = getNode(json, key);
@@ -322,7 +330,7 @@ public abstract class JSON {
      * @param clazz List元素类型
      * @return 值
      */
-    public static <T> @Nullable List<T> getList(String json, String key, @Nonnull Class<T> clazz) {
+    public static <T> @Nullable List<T> getList(@Nullable String json, @Nullable String key, @Nonnull Class<T> clazz) {
         if (key != null && isJson(json)) {
             try {
                 JsonNode valueNode = getNode(json, key);
@@ -345,7 +353,7 @@ public abstract class JSON {
      * @param clazz Set元素类型
      * @return 值
      */
-    public static <T> @Nullable Set<T> getSet(String json, String key, @Nonnull Class<T> clazz) {
+    public static <T> @Nullable Set<T> getSet(@Nullable String json, @Nullable String key, @Nonnull Class<T> clazz) {
         if (StringUtils.hasText(key) && isJson(json)) {
             try {
                 JsonNode valueNode = getNode(json, key);
@@ -368,7 +376,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static @Nullable String getStr(String json, String key) {
+    public static @Nullable String getStr(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null) {
@@ -386,7 +394,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static @Nullable Integer getInt(String json, String key) {
+    public static @Nullable Integer getInt(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null && valueNode.isNumber()) {
@@ -417,7 +425,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static boolean getBool(String json, String key) {
+    public static boolean getBool(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null) {
@@ -446,7 +454,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static @Nullable Boolean getBoolAbs(String json, String key) {
+    public static @Nullable Boolean getBoolAbs(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null && valueNode.isBoolean()) {
@@ -464,7 +472,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static @Nullable BigDecimal getDecimal(String json, String key) {
+    public static @Nullable BigDecimal getDecimal(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null && valueNode.isNumber()) {
@@ -482,7 +490,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static Long getLong(String json, String key) {
+    public static Long getLong(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null && valueNode.isNumber()) {
@@ -500,7 +508,7 @@ public abstract class JSON {
      * @param key  节点key
      * @return 值
      */
-    public static @Nullable Double getDouble(String json, String key) {
+    public static @Nullable Double getDouble(@Nullable String json, @Nullable String key) {
         if (StringUtils.hasText(key) && isJson(json)) {
             JsonNode valueNode = getNode(json, key);
             if (valueNode != null && valueNode.isNumber()) {
