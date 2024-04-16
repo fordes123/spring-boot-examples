@@ -6,7 +6,6 @@ ext {
 
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-data-r2dbc:${springBootVersion}"
     implementation "org.flywaydb:flyway-mysql:${flywayVersion}"
 
