@@ -1,6 +1,5 @@
 package org.fordes.example;
 
-import org.apache.commons.lang3.RegExUtils;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.flyway.FlywayProperties;
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
@@ -17,7 +16,7 @@ public class FlywayConfig {
 
     @Bean(initMethod = "migrate")
     public Flyway flyway(FlywayProperties flywayProperties, R2dbcProperties r2dbcProperties) {
-        String url = RegExUtils.replaceFirst(r2dbcProperties.getUrl(), "r2dbc", "jdbc");
+        String url = r2dbcProperties.getUrl().replaceFirst("r2dbc", "jdbc");
         return Flyway.configure()
                 .dataSource(url, r2dbcProperties.getUsername(), r2dbcProperties.getPassword())
                 .locations(flywayProperties.getLocations().toArray(String[]::new))
