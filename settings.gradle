@@ -1,4 +1,5 @@
 rootProject.name = 'spring-boot-examples'
-include 'flyway-r2dbc'
-include 'jackson-util'
-
+include 'example-flyway-r2dbc'
+include 'example-jackson-util'
+include 'example-virtual-thread'
+include 'example-spring-cloud-stream'

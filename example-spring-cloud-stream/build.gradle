@@ -1,0 +1,7 @@
+dependencies {
+    implementation project(":example-jackson-util")
+
+    implementation "org.springframework.cloud:spring-cloud-stream-binder-kafka:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-stream-binder-rabbit:${springCloudVersion}"
+}
+

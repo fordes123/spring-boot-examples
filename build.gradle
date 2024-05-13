@@ -3,6 +3,8 @@ buildscript {
         springDependencyManagementVersion = "1.1.4"
         springBootVersion = "3.2.3"
         lombokVersion = "1.18.30"
+        jacksonVersion = "2.15.4"
+        springCloudVersion = "4.1.1"
     }
 
     repositories {
@@ -19,15 +21,9 @@ buildscript {
 allprojects {
     group "org.fordes"
     version "1.0.0-SNAPSHOT"
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
 
     apply plugin: "idea"
     apply plugin: "java"
-    apply plugin: "org.springframework.boot"
-    apply plugin: "io.spring.dependency-management"
 
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
@@ -35,36 +31,39 @@ allprojects {
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
     }
+}
+
+subprojects{
+    apply plugin: "org.springframework.boot"
+    apply plugin: "io.spring.dependency-management"
 
     dependencies {
+        implementation "org.springframework.boot:spring-boot-starter"
         runtimeOnly "org.springframework.boot:spring-boot-devtools"
+
+        testImplementation "org.springframework.boot:spring-boot-starter-test"
 
         annotationProcessor "org.projectlombok:lombok:$lombokVersion"
         compileOnly "org.projectlombok:lombok:$lombokVersion"
         testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
         testCompileOnly "org.projectlombok:lombok:$lombokVersion"
+    }
 
+    sourceSets {
+        main {
+            resources {
+                srcDirs += '../resources'
+            }
+        }
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
-        }
-    }
-
-    jar.enabled(true)
-}
-
-subprojects{
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        testImplementation "org.springframework.boot:spring-boot-starter-test"
-
-        test {
-            useJUnitPlatform()
         }
     }
 }

@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: example-spring-cloud-stream
+  cloud:
+    function:
+      definition: producer;consumer;exchange
+    stream:
+      binders:
+        source-1:
+          type: kafka
+          environment:
+            spring:
+              kafka:
+                bootstrap-servers: localhost:9092
+                auto-offset-reset: earliest
+              producer:
+                value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+                auto-create-topics: true
+              consumer:
+                group-id: example-spring-cloud-stream
+                value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+                key-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        source-2:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                username: guest
+                password: guest
+                virtual-host: /
+                serializer: org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+                deserializer: org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+
+      bindings:
+        producer-out-0:
+          destination: dev.fordes.example.kafka
+          binder: source-1
+          content-type: application/json
+
+        exchange-in-0:
+          destination: dev.fordes.example.kafka
+          binder: source-1
+          content-type: application/json
+
+        exchange-out-0:
+          destination: dev.fordes.example.rabbit
+          binder: source-2
+          content-type: application/json
+
+        consumer-in-0:
+          destination: dev.fordes.example.rabbit
+          binder: source-2
+          content-type: application/json
