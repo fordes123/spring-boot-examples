@@ -1,12 +1,4 @@
 buildscript {
-    ext {
-        springDependencyManagementVersion = "1.1.4"
-        springBootVersion = "3.2.3"
-        lombokVersion = "1.18.30"
-        jacksonVersion = "2.15.4"
-        springCloudVersion = "4.1.1"
-    }
-
     repositories {
         mavenLocal()
         mavenCentral()

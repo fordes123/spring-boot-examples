@@ -1,6 +1,6 @@
 spring:
   application:
-    name: flyway-r2dbc
+    name: example-flyway-r2dbc
 
   r2dbc:
     name: item_nav

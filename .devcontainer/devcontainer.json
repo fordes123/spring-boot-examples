@@ -1,0 +1,13 @@
+{
+  "name": "CodeSpace",
+  "dockerFile": "Dockerfile",
+  "extensions": [
+    "redhat.java",
+    "vscjava.vscode-java-pack",
+    "vscjava.vscode-java-debug",
+    "vscjava.vscode-java-test",
+    "vscjava.vscode-gradle",
+    "vmware.vscode-spring-boot",
+    "vscjava.vscode-spring-boot-dashboard",
+  ]
+}
