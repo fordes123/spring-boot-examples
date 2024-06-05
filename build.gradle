@@ -1,13 +1,8 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:${springDependencyManagementVersion}"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-    }
+plugins {
+    id "idea"
+    id "java"
+    id "org.springframework.boot" version "${springBootVersion}"
+    id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
 }
 
 allprojects {
@@ -17,6 +12,11 @@ allprojects {
     apply plugin: "idea"
     apply plugin: "java"
 
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 
@@ -25,7 +25,7 @@ allprojects {
     }
 }
 
-subprojects{
+subprojects {
     apply plugin: "org.springframework.boot"
     apply plugin: "io.spring.dependency-management"
 
